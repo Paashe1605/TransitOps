@@ -18,6 +18,7 @@ We will use the **Feature Branch Workflow**. Everyone will `git pull origin main
   - Oversee PR reviews and merge conflicts.
   - Implement the **Email Reminders** (Bonus Feature) for expiring licenses using a background task (e.g., Celery or FastAPI BackgroundTasks).
   - Implement **PDF Export** (Bonus Feature) for reports.
+  - **Local AI Agent (RAG):** Integrate the local LLM (Ollama/Gemma) into the backend. Create an AI Assistant on the Dashboard that can analyze the fleet's data (e.g., "Which vehicles are costing us the most in maintenance?") using the real-time PostgreSQL data.
 
 ### 2. Prachi (Frontend & UI/UX Expert)
 **Role:** High-class Frontend enhancements and Analytics.
@@ -38,12 +39,11 @@ We will use the **Feature Branch Workflow**. Everyone will `git pull origin main
     - Prevent dispatching if Vehicle is *In Shop* or *Retired*, or Driver is *Suspended* or *Expired*.
   - **Status Transitions:** Automate status changes (e.g., Dispatching changes Vehicle/Driver to *On Trip*; Completing reverts them to *Available*).
 
-### 4. Tushar (Maintenance, Expenses & Local AI)
-**Role:** Maintenance workflow, Financials, and the "Wow Factor" AI integration.
+### 4. Tushar (Maintenance & Expenses)
+**Role:** Maintenance workflow and Financials.
 - **Tasks:**
   - **Maintenance Workflow:** Build the Maintenance Log API. Ensure creating a log switches the Vehicle to *In Shop*.
   - **Fuel & Expenses:** Build tracking for fuel logs and tolls, and calculate Vehicle ROI and Operational Costs.
-  - **Local AI Agent (RAG):** Integrate the local LLM (Ollama/Gemma) into the backend. Create an AI Assistant on the Dashboard that can analyze the fleet's data (e.g., "Which vehicles are costing us the most in maintenance?") using the real-time PostgreSQL data.
 
 ---
 
