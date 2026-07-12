@@ -55,11 +55,6 @@ export default function Trips() {
 
   const handleExportPDF = async () => {
     try {
-      const response = await fetchWithAuth("/reports/export/trips", {
-        headers: { Accept: "application/pdf" },
-      });
-      // fetchWithAuth parses json by default, but if it's a blob we need to handle it.
-      // Wait, fetchWithAuth might throw if not JSON. Let's fix this in lib/api.ts later or just use fetch.
       const token = localStorage.getItem("token");
       const res = await fetch("http://localhost:8000/api/v1/reports/export/trips", {
         headers: { Authorization: `Bearer ${token}` }
