@@ -44,7 +44,7 @@ export default function Expenses() {
       e.expense_type, 
       e.cost, 
       e.liters || 0, 
-      e.date
+      `="${e.date}"`
     ]);
     const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
     
