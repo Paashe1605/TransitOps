@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 
 interface AuthState {
-  token: str | null;
-  role: str | null;
-  setToken: (token: str) => void;
-  setRole: (role: str) => void;
+  token: string | null;
+  role: string | null;
+  setToken: (token: string) => void;
+  setRole: (role: string) => void;
   logout: () => void;
 }
 
