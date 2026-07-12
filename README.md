@@ -3,10 +3,57 @@
 This repository contains the project codebase for the Odoo Hackathon 2026.
 
 ## Stack Overview
-- **Frontend:** React (Vite) + Tailwind CSS + Shadcn UI
-- **Backend:** FastAPI (Python)
-- **Database:** PostgreSQL
-- **AI/Local Models:** Ollama + Gemma 4
+- **Frontend:** React (Vite) + Tailwind CSS v4 + Zustand + React Router
+- **Backend:** FastAPI (Python) + PostgreSQL + Alembic
+- **AI/Local Models:** Ollama (Gemma) + LangChain
+
+## Setup Instructions for the Team (Prachi, Yash, Tushar)
+
+To start working on your assigned feature modules, follow these steps exactly:
+
+### 1. Clone & Branch
+```bash
+git clone https://github.com/Paashe1605/TransitOps.git
+cd TransitOps
+# ALWAYS create a feature branch for your work!
+git checkout -b feature/your-module-name
+```
+
+### 2. Backend Setup
+```bash
+cd backend
+python -m venv venv
+# Activate the virtual environment
+# On Windows:
+.\venv\Scripts\activate
+# On Mac/Linux:
+source venv/bin/activate
+
+pip install -r requirements.txt
+# Start the FastAPI Server
+uvicorn app.main:app --reload
+```
+The API will be running at `http://localhost:8000`. Swagger docs at `http://localhost:8000/docs`.
+
+### 3. Frontend Setup
+Open a new terminal window:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+The frontend will be running at `http://localhost:5173`. 
+*Note: Test credentials are `admin@transitops.com` / `password123`*
+
+### 4. Database Setup
+Make sure you have Docker Desktop running. Paaras has already generated the migrations.
+If you need to spin up the local DB:
+```bash
+docker-compose up -d
+```
+
+## Master Implementation Plan
+Please read `docs/MASTER_PLAN.md` to see exactly what you are building and what your assigned role is.
 
 ---
 
@@ -26,55 +73,25 @@ All of these tasks have been **100% completed** in this feature branch.
 ## 📂 Detailed File Manifest: What, Why, and How
 
 ### Backend Changes (FastAPI)
-- **`backend/app/schemas/vehicle.py`**: 
-  - *What:* Pydantic models for the Vehicle entity. 
-  - *Why/How:* Ensures strict data validation on incoming API requests (e.g., ensuring `max_load` and `acquisition_cost` are logically positive numbers).
-- **`backend/app/schemas/driver.py`**: 
-  - *What:* Pydantic models for the Driver entity.
-  - *Why/How:* Validates driver inputs, specifically ensuring proper date formatting for `expiry_date` and clamping `safety_score` limits.
-- **`backend/app/schemas/trip.py`**: 
-  - *What:* Pydantic models handling Trip creation and Completion flows.
-  - *Why/How:* Defines the schema required to complete a trip (e.g., submitting `final_odometer` and `fuel_cost`).
-- **`backend/app/api/vehicles.py`**: 
-  - *What:* REST API Router for `/vehicles/`.
-  - *Why/How:* Provides `GET`, `POST`, `PUT` routes. Enforces business rule: **Vehicle Registration Numbers must be perfectly unique.** It also checks Role-Based Access Control (RBAC).
-- **`backend/app/api/drivers.py`**: 
-  - *What:* REST API Router for `/drivers/`.
-  - *Why/How:* Provides full CRUD operations and ensures Driver **License Numbers are globally unique**.
-- **`backend/app/api/trips.py`**: 
-  - *What:* The core Business Engine router for `/trips/`.
-  - *Why/How:* Handles the highly complex `/dispatch`, `/complete`, and `/cancel` endpoints. 
-    - **Logic built:** Validates `cargo_weight` against the assigned vehicle's `max_load`. Verifies both the Driver and Vehicle have an `AVAILABLE` status (preventing `IN_SHOP` or `SUSPENDED` assignments). Checks the driver's license expiry against today's date. Automates the transition of Vehicle and Driver statuses to `ON_TRIP` and securely reverts them back to `AVAILABLE` upon completion or cancellation.
-- **`backend/app/main.py`**: 
-  - *What:* FastAPI Application Entrypoint.
-  - *Why/How:* Imported and registered the three new routers into the main API space.
+- **`backend/app/schemas/vehicle.py`**: Pydantic models for the Vehicle entity. 
+- **`backend/app/schemas/driver.py`**: Pydantic models for the Driver entity.
+- **`backend/app/schemas/trip.py`**: Pydantic models handling Trip creation and Completion flows.
+- **`backend/app/api/vehicles.py`**: REST API Router for `/vehicles/`. Enforces business rule: **Vehicle Registration Numbers must be perfectly unique.** 
+- **`backend/app/api/drivers.py`**: REST API Router for `/drivers/`. Ensures Driver **License Numbers are globally unique**.
+- **`backend/app/api/trips.py`**: The core Business Engine router for `/trips/`. Handles `/dispatch`, `/complete`, and `/cancel`. Validates `cargo_weight` against the assigned vehicle's `max_load`. Verifies Driver and Vehicle have an `AVAILABLE` status. Automates the transition of Vehicle and Driver statuses.
+- **`backend/app/main.py`**: Imported and registered the three new routers into the main API space.
 
 ### Frontend Changes (React + Vite)
-- **`frontend/src/lib/api.ts`**: 
-  - *What:* Universal fetch wrapper for authenticated requests.
-  - *Why/How:* Automatically extracts the JWT token from `localStorage` and injects it into the Authorization headers for all API calls. Handles standardized error parsing.
-- **`frontend/src/components/Navbar.tsx` & `Layout.tsx`**: 
-  - *What:* Navigation framework.
-  - *Why/How:* Provides a clean, sticky navigation bar with active routing to the new modules, protected by an auth check that redirects unauthenticated users to `/login`.
-- **`frontend/src/App.tsx` & `Dashboard.tsx`**: 
-  - *What:* Route definitions.
-  - *Why/How:* Wrapped the protected application inside the `Layout` component and decoupled redundant dashboard UI headers to keep the DOM clean.
-- **`frontend/src/pages/Vehicles.tsx`**: 
-  - *What:* Interactive Registry Page.
-  - *Why/How:* Automatically queries the `/vehicles/` API and maps the response to a clean Tailwind data table featuring dynamic status pill badges (Green for Available, Blue for On Trip).
-- **`frontend/src/pages/Drivers.tsx`**: 
-  - *What:* Interactive Drivers Page.
-  - *Why/How:* Displays drivers and their safety scores. Readies the scaffolding for future Add/Edit modals.
-- **`frontend/src/pages/Trips.tsx`**: 
-  - *What:* Operations Command Center.
-  - *Why/How:* Lists all trips. Critically, it implements **Interactive Action Buttons**. If a trip is 'Draft', it shows a Dispatch button. If 'Dispatched', it shows Complete and Cancel buttons. These buttons fire requests to our business logic APIs to trigger status transitions safely.
+- **`frontend/src/lib/api.ts`**: Universal fetch wrapper for authenticated requests.
+- **`frontend/src/components/Navbar.tsx` & `Layout.tsx`**: Navigation framework protected by an auth check.
+- **`frontend/src/App.tsx` & `Dashboard.tsx`**: Route definitions and layout decoupling.
+- **`frontend/src/pages/Vehicles.tsx`**: Interactive Registry Page querying `/vehicles/` API.
+- **`frontend/src/pages/Drivers.tsx`**: Interactive Drivers Page.
+- **`frontend/src/pages/Trips.tsx`**: Operations Command Center with Interactive Action Buttons (Dispatch, Complete, Cancel).
 
 ---
 
 ## 🧪 Testing Guide for Paaras
-
-Paaras, once you pull this PR into your environment, please follow these steps to verify the Core Business Logic module:
-
 ### 1. Boot up the Ecosystem
 Ensure your Docker Desktop is running, then boot both ends:
 ```powershell
