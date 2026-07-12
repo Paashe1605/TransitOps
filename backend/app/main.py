@@ -16,7 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from app.api import auth, users
+from app.api import auth, users, vehicles, drivers, trips
 
 @app.get("/")
 def read_root():
@@ -24,3 +24,6 @@ def read_root():
 
 app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
 app.include_router(users.router, prefix=f"{settings.API_V1_STR}/users", tags=["users"])
+app.include_router(vehicles.router, prefix=f"{settings.API_V1_STR}/vehicles", tags=["vehicles"])
+app.include_router(drivers.router, prefix=f"{settings.API_V1_STR}/drivers", tags=["drivers"])
+app.include_router(trips.router, prefix=f"{settings.API_V1_STR}/trips", tags=["trips"])
