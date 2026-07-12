@@ -3,7 +3,8 @@ import { fetchWithAuth } from "../lib/api";
 import DataGrid from "../components/DataGrid";
 import type { ColumnDef } from "../components/DataGrid";
 import GlassCard from "../components/GlassCard";
-import { Plus } from "lucide-react";
+import CreateExpenseModal from "../components/modals/CreateExpenseModal";
+import { Plus, FileSpreadsheet } from "lucide-react";
 
 interface Expense {
   id: number;
@@ -17,6 +18,7 @@ interface Expense {
 export default function Expenses() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchExpenses();
@@ -31,6 +33,29 @@ export default function Expenses() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleExportCSV = () => {
+    if (expenses.length === 0) return;
+    const headers = ["ID", "Vehicle ID", "Expense Type", "Cost", "Liters", "Date"];
+    const rows = expenses.map(e => [
+      e.id, 
+      e.vehicle_id, 
+      e.expense_type, 
+      e.cost, 
+      e.liters || 0, 
+      e.date
+    ]);
+    const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "expenses_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const columns: ColumnDef<Expense>[] = [
@@ -58,10 +83,27 @@ export default function Expenses() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Expense Analytics</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Track fuel logs, tolls, and maintenance costs.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:opacity-90 rounded-xl transition-colors font-semibold">
-          <Plus size={18} /> Add Expense
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors font-semibold"
+          >
+            <FileSpreadsheet size={18} /> Export CSV
+          </button>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:opacity-90 rounded-xl transition-colors font-semibold"
+          >
+            <Plus size={18} /> Add Expense
+          </button>
+        </div>
       </div>
+
+      <CreateExpenseModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={fetchExpenses} 
+      />
 
       <GlassCard>
         {loading ? (

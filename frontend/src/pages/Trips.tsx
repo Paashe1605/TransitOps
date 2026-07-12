@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { fetchWithAuth } from "../lib/api";
-import { Plus, Send, CheckCircle, XCircle } from "lucide-react";
+import { Plus, Send, CheckCircle, XCircle, FileDown } from "lucide-react";
 import CreateTripModal from "../components/modals/CreateTripModal";
+import CompleteTripModal from "../components/modals/CompleteTripModal";
 import DataGrid from "../components/DataGrid";
 import type { ColumnDef } from "../components/DataGrid";
 import GlassCard from "../components/GlassCard";
@@ -20,6 +21,8 @@ export default function Trips() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+  const [completeTripId, setCompleteTripId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchTrips();
@@ -45,12 +48,32 @@ export default function Trips() {
     }
   };
 
-  const handleComplete = async (id: number) => {
+  const handleCompleteClick = (id: number) => {
+    setCompleteTripId(id);
+    setIsCompleteModalOpen(true);
+  };
+
+  const handleExportPDF = async () => {
     try {
-      await fetchWithAuth(`/trips/${id}/complete`, { method: "POST" });
-      fetchTrips();
+      const response = await fetchWithAuth("/reports/export/trips", {
+        headers: { Accept: "application/pdf" },
+      });
+      // fetchWithAuth parses json by default, but if it's a blob we need to handle it.
+      // Wait, fetchWithAuth might throw if not JSON. Let's fix this in lib/api.ts later or just use fetch.
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:8000/api/v1/reports/export/trips", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Failed to export PDF");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "trips_export.pdf";
+      a.click();
+      window.URL.revokeObjectURL(url);
     } catch (err: any) {
-      alert("Error completing: " + err.message);
+      alert("Error exporting PDF: " + err.message);
     }
   };
 
@@ -96,7 +119,7 @@ export default function Trips() {
           )}
           {t.status === 'Dispatched' && (
             <>
-              <button onClick={() => handleComplete(t.id)} title="Complete" className="p-1.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-lg hover:scale-110 transition-transform">
+              <button onClick={() => handleCompleteClick(t.id)} title="Complete" className="p-1.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-lg hover:scale-110 transition-transform">
                 <CheckCircle size={16} />
               </button>
               <button onClick={() => handleCancel(t.id)} title="Cancel" className="p-1.5 bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 rounded-lg hover:scale-110 transition-transform">
@@ -116,18 +139,33 @@ export default function Trips() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Trip Manifests</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Create and dispatch fleet trips.</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:opacity-90 rounded-xl transition-colors font-semibold"
-        >
-          <Plus size={18} /> Draft Trip
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={handleExportPDF}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors font-semibold"
+          >
+            <FileDown size={18} /> Export PDF
+          </button>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:opacity-90 rounded-xl transition-colors font-semibold"
+          >
+            <Plus size={18} /> Draft Trip
+          </button>
+        </div>
       </div>
 
       <CreateTripModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onSuccess={fetchTrips} 
+      />
+
+      <CompleteTripModal
+        isOpen={isCompleteModalOpen}
+        onClose={() => setIsCompleteModalOpen(false)}
+        onSuccess={fetchTrips}
+        tripId={completeTripId}
       />
 
       <GlassCard>

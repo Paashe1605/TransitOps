@@ -1,4 +1,5 @@
 export const API_URL = "http://localhost:8000/api/v1";
+import { useAuthStore } from "../store/authStore";
 
 export async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem("token");
@@ -18,6 +19,12 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
 
   const response = await fetch(`${API_URL}${endpoint}`, config);
   
+  if (response.status === 401) {
+    useAuthStore.getState().logout();
+    window.location.href = "/login";
+    throw new Error("Unauthorized - Session Expired");
+  }
+
   if (!response.ok) {
     let errorMsg = "API request failed";
     try {

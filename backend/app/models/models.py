@@ -84,6 +84,7 @@ class Trip(Base):
     destination = Column(String, nullable=False)
     cargo_weight = Column(Float, nullable=False)
     planned_distance = Column(Float, nullable=False)
+    revenue = Column(Float, default=0.0)
     status = Column(Enum(TripStatusEnum), default=TripStatusEnum.DRAFT, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 

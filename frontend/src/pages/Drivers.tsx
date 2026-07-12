@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { fetchWithAuth } from "../lib/api";
-import { Plus } from "lucide-react";
+import { Plus, Mail } from "lucide-react";
 import CreateDriverModal from "../components/modals/CreateDriverModal";
 import DataGrid from "../components/DataGrid";
 import type { ColumnDef } from "../components/DataGrid";
@@ -34,6 +34,15 @@ export default function Drivers() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendReminders = async () => {
+    try {
+      const data = await fetchWithAuth("/reports/notify/expiring-licenses", { method: "POST" });
+      alert(`Success! Sent reminders to ${data.notifications_sent} driver(s).`);
+    } catch (err: any) {
+      alert("Error sending reminders: " + err.message);
     }
   };
 
@@ -84,12 +93,20 @@ export default function Drivers() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Driver Directory</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Manage driver profiles and licenses.</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:opacity-90 rounded-xl transition-colors font-semibold"
-        >
-          <Plus size={18} /> Add Driver
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={handleSendReminders}
+            className="flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50 rounded-xl transition-colors font-semibold"
+          >
+            <Mail size={18} /> Send Reminders
+          </button>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:opacity-90 rounded-xl transition-colors font-semibold"
+          >
+            <Plus size={18} /> Add Driver
+          </button>
+        </div>
       </div>
 
       <CreateDriverModal 

@@ -15,9 +15,9 @@ export default function Layout() {
       <Sidebar />
 
       {/* Main Workspace Frame */}
-      <main className="flex-1 pl-[17rem] pr-8 py-6 space-y-6 min-h-screen max-w-7xl mx-auto">
+      <main className="pl-[17rem] pr-8 py-6 min-h-screen w-full">
         {/* Page Content */}
-        <div className="w-full">
+        <div className="max-w-7xl mx-auto w-full space-y-6">
           <Outlet />
         </div>
       </main>

@@ -3,6 +3,7 @@ import { fetchWithAuth } from "../lib/api";
 import DataGrid from "../components/DataGrid";
 import type { ColumnDef } from "../components/DataGrid";
 import GlassCard from "../components/GlassCard";
+import CreateMaintenanceModal from "../components/modals/CreateMaintenanceModal";
 import { Plus, CheckCircle } from "lucide-react";
 
 interface MaintenanceLog {
@@ -17,6 +18,7 @@ interface MaintenanceLog {
 export default function Maintenance() {
   const [logs, setLogs] = useState<MaintenanceLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchLogs();
@@ -84,7 +86,10 @@ export default function Maintenance() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Maintenance Logbook</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Track vehicle repairs and servicing.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:opacity-90 rounded-xl transition-colors font-semibold">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:opacity-90 rounded-xl transition-colors font-semibold"
+        >
           <Plus size={18} /> Add Log
         </button>
       </div>
@@ -105,6 +110,12 @@ export default function Maintenance() {
           />
         )}
       </GlassCard>
+
+      <CreateMaintenanceModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchLogs}
+      />
     </div>
   );
 }

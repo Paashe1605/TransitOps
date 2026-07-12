@@ -119,10 +119,22 @@ async def complete_trip(
     result = await db.execute(select(Driver).filter(Driver.id == trip.driver_id))
     driver = result.scalars().first()
 
-    # Create fuel log could be added here in the future
+    # Create fuel log for the trip if fuel was consumed
+    if complete_in.fuel_consumed > 0 or complete_in.fuel_cost > 0:
+        from app.models.models import FuelLog
+        fuel_log = FuelLog(
+            vehicle_id=vehicle.id,
+            liters=complete_in.fuel_consumed,
+            cost=complete_in.fuel_cost,
+            date=date.today(),
+            expense_type="Fuel"
+        )
+        db.add(fuel_log)
+
     vehicle.odometer = complete_in.final_odometer
 
     trip.status = TripStatusEnum.COMPLETED
+    trip.revenue = complete_in.revenue
     vehicle.status = VehicleStatusEnum.AVAILABLE
     driver.status = DriverStatusEnum.AVAILABLE
 

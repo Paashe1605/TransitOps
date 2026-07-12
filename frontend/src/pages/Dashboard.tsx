@@ -17,6 +17,7 @@ export default function Dashboard() {
   // State for data
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [drivers, setDrivers] = useState<any[]>([]);
+  const [trips, setTrips] = useState<any[]>([]);
   const [expenses, setExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +25,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [v, d, _t, _m, e] = await Promise.all([
+        const [v, d, t, m, e] = await Promise.all([
           fetchWithAuth("/vehicles/"),
           fetchWithAuth("/drivers/"),
           fetchWithAuth("/trips/"),
@@ -33,7 +34,14 @@ export default function Dashboard() {
         ]);
         setVehicles(v);
         setDrivers(d);
-        setExpenses(e);
+        setTrips(t);
+        
+        // Combine all costs into a unified expenses array for charts
+        const combinedExpenses = [
+          ...e.map((exp: any) => ({ ...exp, type: exp.expense_type })),
+          ...m.map((mnt: any) => ({ ...mnt, type: "Maintenance" }))
+        ];
+        setExpenses(combinedExpenses);
       } catch (err) {
         console.error("Failed to load dashboard data:", err);
       } finally {
@@ -54,21 +62,17 @@ export default function Dashboard() {
   const vehiclesInShop = vehicles.filter((v) => v.status === "In Shop").length;
   const totalCost = expenses.reduce((acc, curr) => acc + curr.cost, 0);
 
-
-
-
-  return (
-    <div className="min-h-screen bg-background text-foreground flex">
-
-      {/* Main Workspace Frame */}
-      <main className="flex-1 pl-76 pr-8 py-6 space-y-6 min-h-screen max-w-7xl mx-auto">
-        {/* Top Header Panel */}
-        <div className="flex items-center justify-between glass-panel px-6 py-4.5 rounded-2xl border border-gray-200/50 dark:border-gray-800/50 shadow-sm">
+  const totalRevenue = trips.reduce((acc, trip) => acc + (trip.revenue || 0), 0);
+  const totalAcqCost = vehicles.reduce((acc, v) => acc + (v.acquisition_cost || 0), 0);
+  const fleetROI = totalAcqCost > 0 ? (((totalRevenue - totalCost) / totalAcqCost) * 100).toFixed(1) : "0.0";  return (
+    <div className="space-y-6">
+      {/* Top Header Panel */}
+      <div className="flex items-center justify-between glass-panel px-6 py-4.5 rounded-2xl border border-gray-200/50 dark:border-gray-800/50 shadow-sm">
           <div>
             <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">
               Fleet Operations Hub
             </h1>
-            <p className="text-xs font-semibold text-gray-400 dark:text-gray-400 mt-0.5">
+            <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mt-0.5">
               Logged in as: <span className="text-primary font-bold">{role}</span>
             </p>
           </div>
@@ -78,7 +82,7 @@ export default function Dashboard() {
         {loading ? (
           <div className="h-[60vh] flex flex-col items-center justify-center gap-3">
             <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
+            <span className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
               Loading metrics...
             </span>
           </div>
@@ -87,19 +91,19 @@ export default function Dashboard() {
             {/* Overview dashboard viewport */}
             <div className="space-y-6">
                 {/* Metric Summary Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
                   <GlassCard className="flex items-center gap-4.5 hover:scale-[1.02] hover:shadow-md cursor-default">
                     <div className="p-3.5 bg-blue-500/10 text-blue-500 rounded-xl dark:bg-blue-500/20">
                       <Truck className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
+                      <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                         Fleet Utilization
                       </p>
                       <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">
                         {activeVehicles} / {totalVehicles}
                       </h3>
-                      <p className="text-[10px] text-gray-400 dark:text-gray-400 mt-0.5 font-semibold">
+                      <p className="text-[10px] text-gray-600 dark:text-gray-400 mt-0.5 font-semibold">
                         Vehicles currently on road
                       </p>
                     </div>
@@ -110,13 +114,13 @@ export default function Dashboard() {
                       <Users className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
+                      <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                         Drivers on Duty
                       </p>
                       <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">
                         {driversOnDuty}
                       </h3>
-                      <p className="text-[10px] text-gray-400 dark:text-gray-400 mt-0.5 font-semibold">
+                      <p className="text-[10px] text-gray-600 dark:text-gray-400 mt-0.5 font-semibold">
                         Operators on active routes
                       </p>
                     </div>
@@ -127,13 +131,13 @@ export default function Dashboard() {
                       <Wrench className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
+                      <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                         In Shop Maintenance
                       </p>
                       <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">
                         {vehiclesInShop}
                       </h3>
-                      <p className="text-[10px] text-gray-400 dark:text-gray-400 mt-0.5 font-semibold">
+                      <p className="text-[10px] text-gray-600 dark:text-gray-400 mt-0.5 font-semibold">
                         Vehicles undergoing service
                       </p>
                     </div>
@@ -144,14 +148,30 @@ export default function Dashboard() {
                       <DollarSign className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
+                      <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                         Total Fleet Costs
                       </p>
                       <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">
                         ${totalCost.toLocaleString()}
                       </h3>
-                      <p className="text-[10px] text-gray-400 dark:text-gray-400 mt-0.5 font-semibold">
+                      <p className="text-[10px] text-gray-600 dark:text-gray-400 mt-0.5 font-semibold">
                         Cumulative expenses logged
+                      </p>
+                    </div>
+                  </GlassCard>
+                  <GlassCard className="flex items-center gap-4.5 hover:scale-[1.02] hover:shadow-md cursor-default">
+                    <div className="p-3.5 bg-indigo-500/10 text-indigo-500 rounded-xl dark:bg-indigo-500/20">
+                      <DollarSign className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                        Vehicle ROI
+                      </p>
+                      <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">
+                        {fleetROI}%
+                      </h3>
+                      <p className="text-[10px] text-gray-600 dark:text-gray-400 mt-0.5 font-semibold">
+                        (Revenue - Cost) / Asset
                       </p>
                     </div>
                   </GlassCard>
@@ -164,7 +184,7 @@ export default function Dashboard() {
                       <h3 className="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">
                         Fleet Status Breakdown
                       </h3>
-                      <p className="text-xs text-gray-400 dark:text-gray-400 font-semibold mt-0.5">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-semibold mt-0.5">
                         Allocation of vehicle statuses
                       </p>
                     </div>
@@ -178,7 +198,7 @@ export default function Dashboard() {
                       <h3 className="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">
                         Fuel Efficiency Trends
                       </h3>
-                      <p className="text-xs text-gray-400 dark:text-gray-400 font-semibold mt-0.5">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-semibold mt-0.5">
                         Average kilometers per liter (last 7 months)
                       </p>
                     </div>
@@ -192,7 +212,7 @@ export default function Dashboard() {
                       <h3 className="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">
                         Operational Cost Structure
                       </h3>
-                      <p className="text-xs text-gray-400 dark:text-gray-400 font-semibold mt-0.5">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-semibold mt-0.5">
                         Cumulative expense breakdown by type
                       </p>
                     </div>
@@ -207,7 +227,7 @@ export default function Dashboard() {
                       <h3 className="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">
                         Pending Actions
                       </h3>
-                      <p className="text-xs text-gray-400 dark:text-gray-400 font-semibold mt-0.5">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-semibold mt-0.5">
                         Requires operator attention
                       </p>
                     </div>
@@ -220,7 +240,7 @@ export default function Dashboard() {
                           <p className="text-xs font-bold text-gray-800 dark:text-gray-200">
                             License Expiry Threat
                           </p>
-                          <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-400 mt-0.5">
+                          <p className="text-[10px] font-semibold text-gray-600 dark:text-gray-400 mt-0.5">
                             Suresh Patel's license expires in 4 months.
                           </p>
                         </div>
@@ -233,7 +253,7 @@ export default function Dashboard() {
                           <p className="text-xs font-bold text-gray-800 dark:text-gray-200">
                             Maintenance Scheduled
                           </p>
-                          <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-400 mt-0.5">
+                          <p className="text-[10px] font-semibold text-gray-600 dark:text-gray-400 mt-0.5">
                             AC compressor servicing for MH-02-XY-4321.
                           </p>
                         </div>
@@ -244,7 +264,6 @@ export default function Dashboard() {
             </div>
           </>
         )}
-      </main>
     </div>
   );
 }

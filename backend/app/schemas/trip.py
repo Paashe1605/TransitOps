@@ -10,6 +10,7 @@ class TripBase(BaseModel):
     destination: str = Field(..., max_length=255)
     cargo_weight: float = Field(..., gt=0)
     planned_distance: float = Field(..., gt=0)
+    revenue: float = 0.0
     status: TripStatusEnum = TripStatusEnum.DRAFT
 
 class TripCreate(TripBase):
@@ -39,3 +40,4 @@ class TripCompleteRequest(BaseModel):
     final_odometer: float = Field(..., ge=0)
     fuel_consumed: float = Field(..., ge=0)
     fuel_cost: float = Field(..., ge=0)
+    revenue: float = Field(0.0, ge=0)
