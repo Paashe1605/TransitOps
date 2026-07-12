@@ -1,6 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Vehicles from "./pages/Vehicles";
+import Drivers from "./pages/Drivers";
+import Trips from "./pages/Trips";
+import Layout from "./components/Layout";
 import { useAuthStore } from "./store/authStore";
 
 function App() {
@@ -10,7 +14,13 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={token ? <Navigate to="/" replace /> : <Login />} />
-        <Route path="/" element={<Dashboard />} />
+        
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="vehicles" element={<Vehicles />} />
+          <Route path="drivers" element={<Drivers />} />
+          <Route path="trips" element={<Trips />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
