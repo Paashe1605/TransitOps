@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/authStore";
 import { Navigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
 import ThemeToggle from "../components/ThemeToggle";
 import GlassCard from "../components/GlassCard";
 import DataGrid from "../components/DataGrid";
@@ -29,8 +28,6 @@ import { Truck, Users, Wrench, DollarSign, Calendar } from "lucide-react";
 export default function Dashboard() {
   const token = useAuthStore((state) => state.token);
   const role = useAuthStore((state) => state.role);
-
-  const [activeTab, setActiveTab] = useState("overview");
 
   // State for data
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -227,8 +224,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
-      {/* Sidebar Layout */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Main Workspace Frame */}
       <main className="flex-1 pl-76 pr-8 py-6 space-y-6 min-h-screen max-w-7xl mx-auto">
@@ -236,7 +231,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between glass-panel px-6 py-4.5 rounded-2xl border border-gray-200/50 dark:border-gray-800/50 shadow-sm">
           <div>
             <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-              {getHeaderTitle()}
+              Fleet Operations Hub
             </h1>
             <p className="text-xs font-semibold text-gray-400 dark:text-gray-400 mt-0.5">
               Logged in as: <span className="text-primary font-bold">{role}</span>
@@ -259,8 +254,7 @@ export default function Dashboard() {
         ) : (
           <>
             {/* Overview dashboard viewport */}
-            {activeTab === "overview" && (
-              <div className="space-y-6">
+            <div className="space-y-6">
                 {/* Metric Summary Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                   <GlassCard className="flex items-center gap-4.5 hover:scale-[1.02] hover:shadow-md cursor-default">
@@ -416,88 +410,7 @@ export default function Dashboard() {
                     </div>
                   </GlassCard>
                 </div>
-              </div>
-            )}
-
-            {/* Vehicles Registry View */}
-            {activeTab === "vehicles" && (
-              <GlassCard>
-                <DataGrid
-                  data={vehicles}
-                  columns={vehicleColumns}
-                  searchPlaceholder="Search vehicles by Reg No. or model..."
-                  filterColumn={{
-                    key: "status",
-                    options: ["Available", "On Trip", "In Shop", "Retired"],
-                    label: "Status",
-                  }}
-                />
-              </GlassCard>
-            )}
-
-            {/* Drivers View */}
-            {activeTab === "drivers" && (
-              <GlassCard>
-                <DataGrid
-                  data={drivers}
-                  columns={driverColumns}
-                  searchPlaceholder="Search drivers by name or license..."
-                  filterColumn={{
-                    key: "status",
-                    options: ["Available", "On Trip", "Suspended"],
-                    label: "Status",
-                  }}
-                />
-              </GlassCard>
-            )}
-
-            {/* Trips manifest view */}
-            {activeTab === "trips" && (
-              <GlassCard>
-                <DataGrid
-                  data={trips}
-                  columns={tripColumns}
-                  searchPlaceholder="Search trips by source, destination..."
-                  filterColumn={{
-                    key: "status",
-                    options: ["Pending", "Dispatched", "Completed", "Cancelled"],
-                    label: "Status",
-                  }}
-                />
-              </GlassCard>
-            )}
-
-            {/* Maintenance Logbook View */}
-            {activeTab === "maintenance" && (
-              <GlassCard>
-                <DataGrid
-                  data={maintenance}
-                  columns={maintenanceColumns}
-                  searchPlaceholder="Search logs by description or reg number..."
-                  filterColumn={{
-                    key: "status",
-                    options: ["Scheduled", "In Progress", "Completed"],
-                    label: "Status",
-                  }}
-                />
-              </GlassCard>
-            )}
-
-            {/* Financial Expenses View */}
-            {activeTab === "expenses" && (
-              <GlassCard>
-                <DataGrid
-                  data={expenses}
-                  columns={expenseColumns}
-                  searchPlaceholder="Search expenses by vehicle registration..."
-                  filterColumn={{
-                    key: "type",
-                    options: ["Fuel", "Toll", "Insurance", "Maintenance"],
-                    label: "Expense Type",
-                  }}
-                />
-              </GlassCard>
-            )}
+            </div>
           </>
         )}
       </main>
