@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { fetchWithAuth } from "../lib/api";
-import { Plus, Edit2 } from "lucide-react";
+import { Plus, Edit2, X } from "lucide-react";
 
 interface Driver {
   id: number;
@@ -16,6 +16,16 @@ interface Driver {
 export default function Drivers() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const [formData, setFormData] = useState({
+    license_number: "",
+    name: "",
+    license_category: "",
+    expiry_date: "",
+    contact: "",
+    safety_score: "100"
+  });
 
   useEffect(() => {
     fetchDrivers();
@@ -32,6 +42,24 @@ export default function Drivers() {
     }
   };
 
+  const handleCreateDriver = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await fetchWithAuth("/drivers/", {
+        method: "POST",
+        body: JSON.stringify({
+          ...formData,
+          safety_score: parseInt(formData.safety_score)
+        })
+      });
+      setIsAddModalOpen(false);
+      setFormData({ license_number: "", name: "", license_category: "", expiry_date: "", contact: "", safety_score: "100" });
+      fetchDrivers();
+    } catch (err: any) {
+      alert("Error adding driver: " + err.message);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
@@ -39,7 +67,10 @@ export default function Drivers() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Driver Management</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Manage driver profiles and licenses.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors">
+        <button 
+          onClick={() => setIsAddModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors"
+        >
           <Plus size={18} /> Add Driver
         </button>
       </div>
@@ -95,6 +126,47 @@ export default function Drivers() {
           </table>
         )}
       </div>
+
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-md shadow-xl border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold dark:text-white">Add New Driver</h2>
+              <button onClick={() => setIsAddModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"><X size={20}/></button>
+            </div>
+            <form onSubmit={handleCreateDriver} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium dark:text-gray-300 mb-1">Name</label>
+                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium dark:text-gray-300 mb-1">License Number</label>
+                <input required type="text" value={formData.license_number} onChange={e => setFormData({...formData, license_number: e.target.value})} className="w-full border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium dark:text-gray-300 mb-1">License Category</label>
+                <input required type="text" value={formData.license_category} onChange={e => setFormData({...formData, license_category: e.target.value})} className="w-full border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium dark:text-gray-300 mb-1">Expiry Date</label>
+                <input required type="date" value={formData.expiry_date} onChange={e => setFormData({...formData, expiry_date: e.target.value})} className="w-full border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium dark:text-gray-300 mb-1">Contact (Phone/Email)</label>
+                <input required type="text" value={formData.contact} onChange={e => setFormData({...formData, contact: e.target.value})} className="w-full border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium dark:text-gray-300 mb-1">Safety Score</label>
+                <input required type="number" max="100" min="0" value={formData.safety_score} onChange={e => setFormData({...formData, safety_score: e.target.value})} className="w-full border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 border rounded text-gray-600 dark:text-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add Driver</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

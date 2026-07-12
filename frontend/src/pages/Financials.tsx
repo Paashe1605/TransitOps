@@ -1,25 +1,18 @@
 import { useState } from 'react';
-import { useAuthStore } from '../store/authStore';
+import { fetchWithAuth } from '../lib/api';
 
 export default function Financials() {
-  const token = useAuthStore((state) => state.token);
   const [vehicleId, setVehicleId] = useState('');
   const [roiData, setRoiData] = useState<any>(null);
 
   const fetchRoi = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/expenses/roi/${vehicleId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setRoiData(data);
-      }
-    } catch (err) {
-      console.error(err);
+      const data = await fetchWithAuth(`/expenses/roi/${vehicleId}`);
+      setRoiData(data);
+    } catch (err: any) {
+      setRoiData(null);
+      alert("Error fetching ROI: " + err.message);
     }
   };
 

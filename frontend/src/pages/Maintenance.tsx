@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useAuthStore } from '../store/authStore';
+import { fetchWithAuth } from '../lib/api';
 
 export default function Maintenance() {
-  const token = useAuthStore((state) => state.token);
   const [logs, setLogs] = useState([]);
   const [vehicleId, setVehicleId] = useState('');
   const [description, setDescription] = useState('');
@@ -14,43 +13,31 @@ export default function Maintenance() {
 
   const fetchLogs = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/v1/maintenance/', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setLogs(data);
-      }
-    } catch (err) {
+      const data = await fetchWithAuth('/maintenance/');
+      setLogs(data);
+    } catch (err: any) {
       console.error(err);
+      // We don't alert on initial fetch to avoid popup spam
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:8000/api/v1/maintenance/', {
+      await fetchWithAuth('/maintenance/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify({
           vehicle_id: parseInt(vehicleId),
           description,
           cost: parseFloat(cost)
         })
       });
-      if (res.ok) {
-        setVehicleId('');
-        setDescription('');
-        setCost('');
-        fetchLogs();
-      }
-    } catch (err) {
-      console.error(err);
+      setVehicleId('');
+      setDescription('');
+      setCost('');
+      fetchLogs();
+    } catch (err: any) {
+      alert("Error adding maintenance log: " + err.message);
     }
   };
 

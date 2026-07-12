@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "password"
     POSTGRES_DB: str = "transitops"
+
+    USE_SQLITE: bool = True
     
     # Security Config
     SECRET_KEY: str = "YOUR_SUPER_SECRET_KEY_HERE_FOR_HACKATHON"
@@ -17,6 +19,8 @@ class Settings(BaseSettings):
 
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
+        if self.USE_SQLITE:
+            return "sqlite+aiosqlite:///./dev.db"
         return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}/{self.POSTGRES_DB}"
 
 settings = Settings()
