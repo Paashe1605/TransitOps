@@ -28,6 +28,7 @@ import { Truck, Users, Wrench, DollarSign, Calendar } from "lucide-react";
 export default function Dashboard() {
   const token = useAuthStore((state) => state.token);
   const role = useAuthStore((state) => state.role);
+  const logout = useAuthStore((state) => state.logout);
 
   // State for data
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);

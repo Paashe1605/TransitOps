@@ -36,6 +36,11 @@ async def get_current_user(
         raise credentials_exception
     return user
 
+async def get_current_active_user(
+    current_user: User = Depends(get_current_user)
+) -> User:
+    return current_user
+
 def require_role(allowed_roles: list[RoleEnum]):
     async def role_checker(current_user: User = Depends(get_current_user)):
         if current_user.role not in allowed_roles:
