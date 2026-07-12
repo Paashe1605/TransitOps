@@ -1,17 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/authStore";
 import { useNavigate } from "react-router-dom";
-import { Truck } from "lucide-react";
+import { Truck, Eye, EyeOff } from "lucide-react";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  
   const setToken = useAuthStore((state) => state.setToken);
   const setRole = useAuthStore((state) => state.setRole);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +56,27 @@ export default function Login() {
 
   return (
     <>
+      <style>
+        {`
+          @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          .animate-slide-up {
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          }
+          .animate-slide-up-delayed {
+            opacity: 0;
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+          }
+        `}
+      </style>
+      
+      {/* Theme Toggle in Top Right */}
+      <div className="absolute top-6 right-6 z-40">
+        <ThemeToggle />
+      </div>
+
       {/* Premium Glassmorphism Auth Transition Overlay */}
       {showOverlay && (
         <div
@@ -122,67 +151,81 @@ export default function Login() {
         </div>
       )}
 
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-        <div className="w-full max-w-md space-y-8 rounded-xl bg-white dark:bg-gray-800 p-10 shadow-lg border border-gray-100 dark:border-gray-700">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 transition-colors duration-300">
+        <div className={`w-full max-w-md space-y-8 rounded-2xl bg-white dark:bg-gray-800 p-10 shadow-2xl border border-gray-100 dark:border-gray-700 transition-all ${mounted ? 'animate-slide-up' : 'opacity-0'}`}>
           <div className="flex flex-col items-center">
-            <div className="rounded-full bg-blue-100 p-3 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+            <div className="rounded-2xl bg-blue-100 p-4 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 shadow-inner">
               <Truck className="h-8 w-8" />
             </div>
-            <h2 className="mt-4 text-center text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+            <h2 className="mt-5 text-center text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
               TransitOps
             </h2>
-            <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-              Sign in to your account
+            <p className="mt-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+              Sign in to your workspace
             </p>
           </div>
 
-          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+          <form className={`mt-8 space-y-6 ${mounted ? 'animate-slide-up-delayed' : 'opacity-0'}`} onSubmit={handleLogin}>
             {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-500 dark:bg-red-900/20 dark:text-red-400 text-center">
+              <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400 text-center font-medium border border-red-100 dark:border-red-800/30">
                 {error}
               </div>
             )}
-            <div className="space-y-4 rounded-md shadow-sm">
+            <div className="space-y-5">
               <div>
-                <label className="sr-only" htmlFor="email-address">Email address</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5" htmlFor="email-address">
+                  Email Address
+                </label>
                 <input
                   id="email-address"
                   name="email"
                   type="email"
                   required
                   disabled={isLoading}
-                  className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 sm:text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-opacity"
-                  placeholder="Email address"
+                  className="relative block w-full appearance-none rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 sm:text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
+                  placeholder="admin@transitops.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div>
-                <label className="sr-only" htmlFor="password">Password</label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  disabled={isLoading}
-                  className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 sm:text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-opacity"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5" htmlFor="password">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    disabled={isLoading}
+                    className="relative block w-full appearance-none rounded-xl border border-gray-300 pl-4 pr-12 py-3 text-gray-900 placeholder-gray-400 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 sm:text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors focus:outline-none"
+                    disabled={isLoading}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div>
+            <div className="pt-2">
               <button
                 type="submit"
                 disabled={isLoading}
-                className="group relative flex w-full items-center justify-center gap-2.5 rounded-md border border-transparent bg-blue-600 py-2.5 px-4 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-600 transition-all duration-200 disabled:opacity-80 disabled:cursor-not-allowed"
+                className="group relative flex w-full items-center justify-center gap-2.5 rounded-xl border border-transparent bg-blue-600 py-3 px-4 text-sm font-bold text-white shadow-md hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-offset-gray-900 transition-all duration-200 disabled:opacity-80 disabled:cursor-not-allowed active:scale-[0.98]"
               >
                 {isLoading ? (
                   <>
                     <svg
-                      className="animate-spin h-4 w-4 text-white"
+                      className="animate-spin h-5 w-5 text-white"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -190,10 +233,10 @@ export default function Login() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
-                    Signing in...
+                    Authenticating...
                   </>
                 ) : (
-                  "Sign in"
+                  "Sign In"
                 )}
               </button>
             </div>
