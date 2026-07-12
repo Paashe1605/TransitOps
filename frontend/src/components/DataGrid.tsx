@@ -119,7 +119,7 @@ export default function DataGrid<T extends { id: any }>({
       {/* Search & Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
         <div className="relative w-full sm:max-w-xs">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-400" />
           <input
             type="text"
             placeholder={searchPlaceholder}
@@ -131,7 +131,7 @@ export default function DataGrid<T extends { id: any }>({
 
         {filterColumn && (
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
               {filterColumn.label}:
             </span>
             <select
@@ -159,14 +159,14 @@ export default function DataGrid<T extends { id: any }>({
                 <th
                   key={col.key.toString()}
                   onClick={() => col.sortable !== false && handleSort(col.key.toString())}
-                  className={`px-6 py-4 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider select-none ${
+                  className={`px-6 py-4 text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider select-none ${
                     col.sortable !== false ? "cursor-pointer hover:text-gray-700 dark:hover:text-gray-200" : ""
                   }`}
                 >
                   <div className="flex items-center gap-1.5">
                     {col.header}
                     {col.sortable !== false && (
-                      <span className="text-gray-400 dark:text-gray-600">
+                      <span className="text-gray-400 dark:text-gray-400">
                         {sortKey === col.key.toString() ? (
                           sortDirection === "asc" ? (
                             <ChevronUp className="h-3.5 w-3.5" />
@@ -201,7 +201,7 @@ export default function DataGrid<T extends { id: any }>({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-6 py-12 text-center text-xs font-medium text-gray-400 dark:text-gray-500"
+                  className="px-6 py-12 text-center text-xs font-medium text-gray-400 dark:text-gray-400"
                 >
                   No matching records found
                 </td>
@@ -214,7 +214,7 @@ export default function DataGrid<T extends { id: any }>({
       {/* Pagination Bar */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-2 pt-1">
-          <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+          <span className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
             Page <span className="text-gray-800 dark:text-gray-200">{currentPage}</span> of{" "}
             <span className="text-gray-800 dark:text-gray-200">{totalPages}</span>
           </span>

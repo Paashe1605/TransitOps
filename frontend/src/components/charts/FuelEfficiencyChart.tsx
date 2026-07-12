@@ -81,7 +81,7 @@ export default function FuelEfficiencyChart() {
                 x={paddingLeft - 8}
                 y={y + 3}
                 textAnchor="end"
-                className="text-[9px] font-bold text-gray-400 dark:text-gray-500 fill-current"
+                className="text-[9px] font-bold text-gray-400 dark:text-gray-400 fill-current"
               >
                 {val.toFixed(1)}
               </text>
@@ -120,7 +120,7 @@ export default function FuelEfficiencyChart() {
               x={p.x}
               y={paddingTop + chartHeight + 16}
               textAnchor="middle"
-              className="text-[10px] font-bold text-gray-400 dark:text-gray-500 fill-current"
+              className="text-[10px] font-bold text-gray-400 dark:text-gray-400 fill-current"
             >
               {p.label}
             </text>
@@ -147,7 +147,7 @@ export default function FuelEfficiencyChart() {
             top: `${((hoveredPoint.y - paddingTop) / chartHeight) * 55 - 10}%`,
           }}
         >
-          <div className="text-gray-400 dark:text-gray-500 text-[9px] uppercase tracking-wide">
+          <div className="text-gray-400 dark:text-gray-400 text-[9px] uppercase tracking-wide">
             {hoveredPoint.label} Avg Efficiency
           </div>
           <div className="text-blue-600 dark:text-blue-400 font-extrabold text-sm">{hoveredPoint.val} km/L</div>

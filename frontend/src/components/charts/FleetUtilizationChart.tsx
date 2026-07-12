@@ -67,7 +67,7 @@ export default function FleetUtilizationChart({ vehicles }: FleetUtilizationChar
         </svg>
         <div className="absolute flex flex-col items-center">
           <span className="text-3xl font-extrabold text-gray-800 dark:text-white">{vehicles.length}</span>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 dark:text-gray-500 mt-0.5">
+          <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 dark:text-gray-400 mt-0.5">
             Total Fleet
           </span>
         </div>
@@ -82,7 +82,7 @@ export default function FleetUtilizationChart({ vehicles }: FleetUtilizationChar
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-gray-900 dark:text-white">{item.count}</span>
-              <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 w-10 text-right">
+              <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-400 w-10 text-right">
                 {Math.round((item.count / total) * 100)}%
               </span>
             </div>

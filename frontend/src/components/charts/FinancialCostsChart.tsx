@@ -46,7 +46,7 @@ export default function FinancialCostsChart({ expenses }: FinancialCostsChartPro
           );
         })}
       </div>
-      <div className="pt-2 border-t border-gray-100 dark:border-gray-800/80 flex justify-between items-center text-[10px] text-gray-400 dark:text-gray-500 font-bold">
+      <div className="pt-2 border-t border-gray-100 dark:border-gray-800/80 flex justify-between items-center text-[10px] text-gray-400 dark:text-gray-400 font-bold">
         <span>0</span>
         <span>${Math.round(maxVal / 2).toLocaleString()}</span>
         <span>${Math.round(maxVal).toLocaleString()}</span>

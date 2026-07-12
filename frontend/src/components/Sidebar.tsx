@@ -29,7 +29,7 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
           <span className="font-extrabold text-xl bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
             TransitOps
           </span>
-          <p className="text-[10px] uppercase font-semibold tracking-wider text-gray-400 dark:text-gray-500 mt-0.5">
+          <p className="text-[10px] uppercase font-semibold tracking-wider text-gray-400 dark:text-gray-400 mt-0.5">
             {role || "Operator"} Workspace
           </p>
         </div>
@@ -46,7 +46,7 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 group relative ${
                 isActive
                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.02]"
-                  : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/40"
+                  : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/40"
               }`}
             >
               <Icon className={`h-5 w-5 transition-transform duration-200 ${!isActive && "group-hover:scale-110"}`} />

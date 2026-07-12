@@ -237,7 +237,7 @@ export default function Dashboard() {
             <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">
               {getHeaderTitle()}
             </h1>
-            <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 mt-0.5">
+            <p className="text-xs font-semibold text-gray-400 dark:text-gray-400 mt-0.5">
               Logged in as: <span className="text-primary font-bold">{role}</span>
             </p>
           </div>
@@ -250,7 +250,7 @@ export default function Dashboard() {
         {loading ? (
           <div className="h-[60vh] flex flex-col items-center justify-center gap-3">
             <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+            <span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
               Loading metrics...
             </span>
           </div>
@@ -266,13 +266,13 @@ export default function Dashboard() {
                       <Truck className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                         Fleet Utilization
                       </p>
                       <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">
                         {activeVehicles} / {totalVehicles}
                       </h3>
-                      <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-semibold">
+                      <p className="text-[10px] text-gray-400 dark:text-gray-400 mt-0.5 font-semibold">
                         Vehicles currently on road
                       </p>
                     </div>
@@ -283,13 +283,13 @@ export default function Dashboard() {
                       <Users className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                         Drivers on Duty
                       </p>
                       <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">
                         {driversOnDuty}
                       </h3>
-                      <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-semibold">
+                      <p className="text-[10px] text-gray-400 dark:text-gray-400 mt-0.5 font-semibold">
                         Operators on active routes
                       </p>
                     </div>
@@ -300,13 +300,13 @@ export default function Dashboard() {
                       <Wrench className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                         In Shop Maintenance
                       </p>
                       <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">
                         {vehiclesInShop}
                       </h3>
-                      <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-semibold">
+                      <p className="text-[10px] text-gray-400 dark:text-gray-400 mt-0.5 font-semibold">
                         Vehicles undergoing service
                       </p>
                     </div>
@@ -317,13 +317,13 @@ export default function Dashboard() {
                       <DollarSign className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                         Total Fleet Costs
                       </p>
                       <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">
                         ${totalCost.toLocaleString()}
                       </h3>
-                      <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-semibold">
+                      <p className="text-[10px] text-gray-400 dark:text-gray-400 mt-0.5 font-semibold">
                         Cumulative expenses logged
                       </p>
                     </div>
@@ -337,7 +337,7 @@ export default function Dashboard() {
                       <h3 className="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">
                         Fleet Status Breakdown
                       </h3>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-0.5">
+                      <p className="text-xs text-gray-400 dark:text-gray-400 font-semibold mt-0.5">
                         Allocation of vehicle statuses
                       </p>
                     </div>
@@ -351,7 +351,7 @@ export default function Dashboard() {
                       <h3 className="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">
                         Fuel Efficiency Trends
                       </h3>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-0.5">
+                      <p className="text-xs text-gray-400 dark:text-gray-400 font-semibold mt-0.5">
                         Average kilometers per liter (last 7 months)
                       </p>
                     </div>
@@ -365,7 +365,7 @@ export default function Dashboard() {
                       <h3 className="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">
                         Operational Cost Structure
                       </h3>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-0.5">
+                      <p className="text-xs text-gray-400 dark:text-gray-400 font-semibold mt-0.5">
                         Cumulative expense breakdown by type
                       </p>
                     </div>
@@ -380,7 +380,7 @@ export default function Dashboard() {
                       <h3 className="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">
                         Pending Actions
                       </h3>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-0.5">
+                      <p className="text-xs text-gray-400 dark:text-gray-400 font-semibold mt-0.5">
                         Requires operator attention
                       </p>
                     </div>
@@ -393,7 +393,7 @@ export default function Dashboard() {
                           <p className="text-xs font-bold text-gray-800 dark:text-gray-200">
                             License Expiry Threat
                           </p>
-                          <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mt-0.5">
+                          <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-400 mt-0.5">
                             Suresh Patel's license expires in 4 months.
                           </p>
                         </div>
@@ -406,7 +406,7 @@ export default function Dashboard() {
                           <p className="text-xs font-bold text-gray-800 dark:text-gray-200">
                             Maintenance Scheduled
                           </p>
-                          <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mt-0.5">
+                          <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-400 mt-0.5">
                             AC compressor servicing for MH-02-XY-4321.
                           </p>
                         </div>
