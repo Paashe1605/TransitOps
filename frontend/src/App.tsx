@@ -4,6 +4,8 @@ import Dashboard from "./pages/Dashboard";
 import Vehicles from "./pages/Vehicles";
 import Drivers from "./pages/Drivers";
 import Trips from "./pages/Trips";
+import Maintenance from "./pages/Maintenance";
+import Expenses from "./pages/Expenses";
 import Layout from "./components/Layout";
 import { useAuthStore } from "./store/authStore";
 
@@ -20,6 +22,8 @@ function App() {
           <Route path="vehicles" element={<Vehicles />} />
           <Route path="drivers" element={<Drivers />} />
           <Route path="trips" element={<Trips />} />
+          <Route path="maintenance" element={<Maintenance />} />
+          <Route path="expenses" element={<Expenses />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { fetchWithAuth } from "../lib/api";
-import { Plus, Edit2 } from "lucide-react";
+import { Plus } from "lucide-react";
+import CreateVehicleModal from "../components/modals/CreateVehicleModal";
+import DataGrid from "../components/DataGrid";
+import type { ColumnDef } from "../components/DataGrid";
+import GlassCard from "../components/GlassCard";
 
 interface Vehicle {
   id: number;
@@ -9,12 +13,14 @@ interface Vehicle {
   type: string;
   max_load: number;
   odometer: number;
+  acquisition_cost: number;
   status: string;
 }
 
 export default function Vehicles() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchVehicles();
@@ -31,67 +37,67 @@ export default function Vehicles() {
     }
   };
 
+  const renderVehicleStatus = (v: Vehicle) => {
+    const styles: Record<string, string> = {
+      Available: "bg-emerald-50 text-emerald-700 border-emerald-200/50 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
+      "On Trip": "bg-blue-50 text-blue-700 border-blue-200/50 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
+      "In Shop": "bg-amber-50 text-amber-700 border-amber-200/50 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
+      Retired: "bg-rose-50 text-rose-700 border-rose-200/50 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20",
+    };
+    return (
+      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border tracking-wider uppercase ${styles[v.status] || styles['Available']}`}>
+        {v.status}
+      </span>
+    );
+  };
+
+  const vehicleColumns: ColumnDef<Vehicle>[] = [
+    { key: "registration_number", header: "Reg No.", sortable: true },
+    { key: "model", header: "Model", sortable: true },
+    { key: "type", header: "Type", sortable: true },
+    { key: "max_load", header: "Max Cap (kg)", sortable: true, render: (v) => `${v.max_load.toLocaleString()} kg` },
+    { key: "odometer", header: "Odometer (km)", sortable: true, render: (v) => `${v.odometer.toLocaleString()} km` },
+    { key: "acquisition_cost", header: "Cost", sortable: true, render: (v) => v.acquisition_cost ? `$${v.acquisition_cost.toLocaleString()}` : '-' },
+    { key: "status", header: "Status", sortable: true, render: renderVehicleStatus },
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="flex justify-between items-center glass-panel p-6 rounded-xl border border-gray-200/50 dark:border-gray-800/50 shadow-sm">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Vehicle Registry</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your fleet vehicles here.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:opacity-90 rounded-xl transition-colors font-semibold"
+        >
           <Plus size={18} /> Add Vehicle
         </button>
       </div>
+      
+      <CreateVehicleModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={fetchVehicles} 
+      />
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <GlassCard>
         {loading ? (
-          <div className="p-8 text-center text-gray-500 dark:text-gray-400">Loading vehicles...</div>
+           <div className="p-8 text-center text-gray-500 dark:text-gray-400">Loading vehicles...</div>
         ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                <th className="px-6 py-4">Reg. Number</th>
-                <th className="px-6 py-4">Model</th>
-                <th className="px-6 py-4">Type</th>
-                <th className="px-6 py-4">Max Load (kg)</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {vehicles.map((v) => (
-                <tr key={v.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{v.registration_number}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{v.model}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{v.type}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{v.max_load}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                      v.status === 'Available' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                      v.status === 'On Trip' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                      'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-                    }`}>
-                      {v.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                      <Edit2 size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {vehicles.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                    No vehicles found. Click "Add Vehicle" to register one.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <DataGrid
+            data={vehicles}
+            columns={vehicleColumns}
+            searchPlaceholder="Search vehicles by Reg No. or model..."
+            filterColumn={{
+              key: "status",
+              options: ["Available", "On Trip", "In Shop", "Retired"],
+              label: "Status",
+            }}
+          />
         )}
-      </div>
+      </GlassCard>
     </div>
   );
 }

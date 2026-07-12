@@ -55,9 +55,10 @@ class Vehicle(Base):
     acquisition_cost = Column(Float, nullable=False)
     status = Column(Enum(VehicleStatusEnum), default=VehicleStatusEnum.AVAILABLE, nullable=False)
     
-    trips = relationship("Trip", back_populates="vehicle")
-    maintenance_logs = relationship("MaintenanceLog", back_populates="vehicle")
-    fuel_logs = relationship("FuelLog", back_populates="vehicle")
+    trips = relationship("Trip", back_populates="vehicle", cascade="all, delete")
+    maintenance_logs = relationship("MaintenanceLog", back_populates="vehicle", cascade="all, delete")
+    fuel_logs = relationship("FuelLog", back_populates="vehicle", cascade="all, delete")
+    documents = relationship("VehicleDocument", back_populates="vehicle", cascade="all, delete")
 
 
 class Driver(Base):
@@ -84,7 +85,7 @@ class Trip(Base):
     cargo_weight = Column(Float, nullable=False)
     planned_distance = Column(Float, nullable=False)
     status = Column(Enum(TripStatusEnum), default=TripStatusEnum.DRAFT, nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     vehicle = relationship("Vehicle", back_populates="trips")
     driver = relationship("Driver", back_populates="trips")
@@ -97,7 +98,7 @@ class MaintenanceLog(Base):
     description = Column(String, nullable=False)
     cost = Column(Float, nullable=False)
     status = Column(Enum(MaintenanceStatusEnum), default=MaintenanceStatusEnum.OPEN, nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     vehicle = relationship("Vehicle", back_populates="maintenance_logs")
 
@@ -112,3 +113,15 @@ class FuelLog(Base):
     expense_type = Column(String, default="Fuel", nullable=False)
 
     vehicle = relationship("Vehicle", back_populates="fuel_logs")
+
+
+class VehicleDocument(Base):
+    __tablename__ = "vehicle_documents"
+    id = Column(Integer, primary_key=True, index=True)
+    vehicle_id = Column(Integer, ForeignKey("vehicles.id"), nullable=False)
+    document_type = Column(String, nullable=False) # e.g. Insurance, Registration, Permit
+    document_name = Column(String, nullable=False)
+    expiry_date = Column(Date, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    vehicle = relationship("Vehicle", back_populates="documents")

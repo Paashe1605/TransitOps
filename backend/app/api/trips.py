@@ -7,14 +7,14 @@ from datetime import date
 from app.db.session import get_db
 from app.models.models import Trip, Vehicle, Driver, User, RoleEnum, TripStatusEnum, VehicleStatusEnum, DriverStatusEnum
 from app.schemas.trip import Trip as TripSchema, TripCreate, TripUpdate, TripCompleteRequest
-from app.api.deps import get_current_active_user
+from app.api.deps import get_current_user
 
 router = APIRouter()
 
 @router.get("/", response_model=List[TripSchema])
 async def read_trips(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
     skip: int = 0,
     limit: int = 100,
 ) -> Any:
@@ -27,7 +27,7 @@ async def create_trip(
     *,
     db: AsyncSession = Depends(get_db),
     trip_in: TripCreate,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
 ) -> Any:
     if current_user.role not in [RoleEnum.FLEET_MANAGER, RoleEnum.DRIVER]:
         raise HTTPException(status_code=403, detail="Not enough permissions")
@@ -57,7 +57,7 @@ async def dispatch_trip(
     *,
     db: AsyncSession = Depends(get_db),
     id: int,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
 ) -> Any:
     result = await db.execute(select(Trip).filter(Trip.id == id))
     trip = result.scalars().first()
@@ -103,7 +103,7 @@ async def complete_trip(
     db: AsyncSession = Depends(get_db),
     id: int,
     complete_in: TripCompleteRequest,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
 ) -> Any:
     result = await db.execute(select(Trip).filter(Trip.id == id))
     trip = result.scalars().first()
@@ -139,7 +139,7 @@ async def cancel_trip(
     *,
     db: AsyncSession = Depends(get_db),
     id: int,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
 ) -> Any:
     result = await db.execute(select(Trip).filter(Trip.id == id))
     trip = result.scalars().first()

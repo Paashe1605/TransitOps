@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { fetchWithAuth } from "../lib/api";
-import { Plus, Edit2 } from "lucide-react";
+import { Plus } from "lucide-react";
+import CreateDriverModal from "../components/modals/CreateDriverModal";
+import DataGrid from "../components/DataGrid";
+import type { ColumnDef } from "../components/DataGrid";
+import GlassCard from "../components/GlassCard";
 
 interface Driver {
   id: number;
@@ -16,6 +20,7 @@ interface Driver {
 export default function Drivers() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchDrivers();
@@ -32,69 +37,83 @@ export default function Drivers() {
     }
   };
 
+  const renderDriverStatus = (d: Driver) => {
+    const styles: Record<string, string> = {
+      Available: "bg-emerald-50 text-emerald-700 border-emerald-200/50 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
+      "On Trip": "bg-blue-50 text-blue-700 border-blue-200/50 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
+      Suspended: "bg-rose-50 text-rose-700 border-rose-200/50 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20",
+    };
+    return (
+      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border tracking-wider uppercase ${styles[d.status] || styles['Available']}`}>
+        {d.status}
+      </span>
+    );
+  };
+
+  const driverColumns: ColumnDef<Driver>[] = [
+    { key: "name", header: "Name", sortable: true },
+    { key: "license_number", header: "License No.", sortable: false },
+    { key: "license_category", header: "Category", sortable: true },
+    { key: "expiry_date", header: "Expiry Date", sortable: true },
+    { key: "contact", header: "Contact", sortable: false },
+    {
+      key: "safety_score",
+      header: "Safety Score",
+      sortable: true,
+      render: (d) => (
+        <span
+          className={`font-bold ${
+            d.safety_score >= 90
+              ? "text-emerald-600 dark:text-emerald-400"
+              : d.safety_score >= 75
+              ? "text-amber-600 dark:text-amber-400"
+              : "text-rose-600 dark:text-rose-400"
+          }`}
+        >
+          {d.safety_score}%
+        </span>
+      ),
+    },
+    { key: "status", header: "Status", sortable: true, render: renderDriverStatus },
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="flex justify-between items-center glass-panel p-6 rounded-xl border border-gray-200/50 dark:border-gray-800/50 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Driver Management</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Driver Directory</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Manage driver profiles and licenses.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:opacity-90 rounded-xl transition-colors font-semibold"
+        >
           <Plus size={18} /> Add Driver
         </button>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <CreateDriverModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={fetchDrivers} 
+      />
+
+      <GlassCard>
         {loading ? (
           <div className="p-8 text-center text-gray-500 dark:text-gray-400">Loading drivers...</div>
         ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">License #</th>
-                <th className="px-6 py-4">Category</th>
-                <th className="px-6 py-4">Expiry Date</th>
-                <th className="px-6 py-4">Score</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {drivers.map((d) => (
-                <tr key={d.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{d.name}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{d.license_number}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{d.license_category}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{d.expiry_date}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{d.safety_score}/100</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                      d.status === 'Available' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                      d.status === 'On Trip' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                      'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                    }`}>
-                      {d.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                      <Edit2 size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {drivers.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                    No drivers found. Click "Add Driver" to register one.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <DataGrid
+            data={drivers}
+            columns={driverColumns}
+            searchPlaceholder="Search drivers by name or license..."
+            filterColumn={{
+              key: "status",
+              options: ["Available", "On Trip", "Suspended"],
+              label: "Status",
+            }}
+          />
         )}
-      </div>
+      </GlassCard>
     </div>
   );
 }

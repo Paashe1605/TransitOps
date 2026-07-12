@@ -1,22 +1,21 @@
-import { LayoutDashboard, Truck, Users, Route, Wrench, DollarSign, LogOut } from "lucide-react";
+import { LayoutDashboard, Truck, Users, Route as RouteIcon, Wrench, DollarSign, LogOut } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
+import { useLocation, useNavigate } from "react-router-dom";
+import ThemeToggle from "./ThemeToggle";
 
-interface SidebarProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-}
-
-export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
+export default function Sidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const logout = useAuthStore((state) => state.logout);
   const role = useAuthStore((state) => state.role);
 
   const menuItems = [
-    { id: "overview", label: "Overview", icon: LayoutDashboard },
-    { id: "vehicles", label: "Vehicles", icon: Truck },
-    { id: "drivers", label: "Drivers", icon: Users },
-    { id: "trips", label: "Trips", icon: Route },
-    { id: "maintenance", label: "Maintenance", icon: Wrench },
-    { id: "expenses", label: "Expenses", icon: DollarSign },
+    { id: "overview", path: "/", label: "Overview", icon: LayoutDashboard },
+    { id: "vehicles", path: "/vehicles", label: "Vehicles", icon: Truck },
+    { id: "drivers", path: "/drivers", label: "Drivers", icon: Users },
+    { id: "trips", path: "/trips", label: "Trips", icon: RouteIcon },
+    { id: "maintenance", path: "/maintenance", label: "Maintenance", icon: Wrench },
+    { id: "expenses", path: "/expenses", label: "Expenses", icon: DollarSign },
   ];
 
   return (
@@ -38,11 +37,11 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
       <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeTab === item.id;
+          const isActive = location.pathname === item.path || (item.path !== "/" && location.pathname.startsWith(item.path));
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => navigate(item.path)}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 group relative ${
                 isActive
                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.02]"
@@ -59,7 +58,11 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
         })}
       </nav>
 
-      <div className="p-4 border-t border-gray-200/30 dark:border-gray-800/30">
+      <div className="p-4 border-t border-gray-200/30 dark:border-gray-800/30 flex flex-col gap-2">
+        <div className="px-4 py-2 flex items-center justify-between text-sm font-medium text-gray-600 dark:text-gray-300">
+          Theme
+          <ThemeToggle />
+        </div>
         <button
           onClick={logout}
           className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50/50 dark:hover:bg-red-950/20 rounded-xl transition-all duration-200"

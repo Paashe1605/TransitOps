@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional
+from datetime import date, datetime
 from app.models.models import VehicleStatusEnum
 
 class VehicleBase(BaseModel):
@@ -32,3 +33,19 @@ class VehicleInDBBase(VehicleBase):
 
 class Vehicle(VehicleInDBBase):
     pass
+
+class VehicleDocumentBase(BaseModel):
+    document_type: str
+    document_name: str
+    expiry_date: date
+
+class VehicleDocumentCreate(VehicleDocumentBase):
+    vehicle_id: int
+
+class VehicleDocumentResponse(VehicleDocumentBase):
+    id: int
+    vehicle_id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

@@ -4,16 +4,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.db.session import get_db
-from app.models.models import Vehicle, User, RoleEnum
-from app.schemas.vehicle import Vehicle as VehicleSchema, VehicleCreate, VehicleUpdate
-from app.api.deps import get_current_active_user
+from app.models.models import Vehicle, User, RoleEnum, VehicleDocument
+from app.schemas.vehicle import Vehicle as VehicleSchema, VehicleCreate, VehicleUpdate, VehicleDocumentCreate, VehicleDocumentResponse
+from app.api.deps import get_current_user
 
 router = APIRouter()
 
 @router.get("/", response_model=List[VehicleSchema])
 async def read_vehicles(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
     skip: int = 0,
     limit: int = 100,
 ) -> Any:
@@ -26,7 +26,7 @@ async def create_vehicle(
     *,
     db: AsyncSession = Depends(get_db),
     vehicle_in: VehicleCreate,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
 ) -> Any:
     if current_user.role not in [RoleEnum.FLEET_MANAGER, RoleEnum.SAFETY_OFFICER]:
         raise HTTPException(status_code=403, detail="Not enough permissions")
@@ -49,7 +49,7 @@ async def read_vehicle(
     *,
     db: AsyncSession = Depends(get_db),
     id: int,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
 ) -> Any:
     result = await db.execute(select(Vehicle).filter(Vehicle.id == id))
     vehicle = result.scalars().first()
@@ -63,7 +63,7 @@ async def update_vehicle(
     db: AsyncSession = Depends(get_db),
     id: int,
     vehicle_in: VehicleUpdate,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
 ) -> Any:
     if current_user.role not in [RoleEnum.FLEET_MANAGER, RoleEnum.SAFETY_OFFICER]:
         raise HTTPException(status_code=403, detail="Not enough permissions")
@@ -86,3 +86,48 @@ async def update_vehicle(
     await db.commit()
     await db.refresh(vehicle)
     return vehicle
+
+@router.post("/documents", response_model=VehicleDocumentResponse)
+async def create_vehicle_document(
+    *,
+    db: AsyncSession = Depends(get_db),
+    doc_in: VehicleDocumentCreate,
+    current_user: User = Depends(get_current_user),
+) -> Any:
+    if current_user.role not in [RoleEnum.FLEET_MANAGER, RoleEnum.SAFETY_OFFICER]:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+        
+    doc = VehicleDocument(**doc_in.dict())
+    db.add(doc)
+    await db.commit()
+    await db.refresh(doc)
+    return doc
+
+@router.get("/{id}/documents", response_model=List[VehicleDocumentResponse])
+async def read_vehicle_documents(
+    *,
+    db: AsyncSession = Depends(get_db),
+    id: int,
+    current_user: User = Depends(get_current_user),
+) -> Any:
+    result = await db.execute(select(VehicleDocument).filter(VehicleDocument.vehicle_id == id))
+    return result.scalars().all()
+
+@router.delete("/documents/{doc_id}")
+async def delete_vehicle_document(
+    *,
+    db: AsyncSession = Depends(get_db),
+    doc_id: int,
+    current_user: User = Depends(get_current_user),
+) -> Any:
+    if current_user.role not in [RoleEnum.FLEET_MANAGER, RoleEnum.SAFETY_OFFICER]:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+        
+    result = await db.execute(select(VehicleDocument).filter(VehicleDocument.id == doc_id))
+    doc = result.scalars().first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+        
+    await db.delete(doc)
+    await db.commit()
+    return {"status": "success"}

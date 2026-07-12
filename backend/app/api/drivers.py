@@ -6,14 +6,14 @@ from sqlalchemy.future import select
 from app.db.session import get_db
 from app.models.models import Driver, User, RoleEnum
 from app.schemas.driver import Driver as DriverSchema, DriverCreate, DriverUpdate
-from app.api.deps import get_current_active_user
+from app.api.deps import get_current_user
 
 router = APIRouter()
 
 @router.get("/", response_model=List[DriverSchema])
 async def read_drivers(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
     skip: int = 0,
     limit: int = 100,
 ) -> Any:
@@ -26,7 +26,7 @@ async def create_driver(
     *,
     db: AsyncSession = Depends(get_db),
     driver_in: DriverCreate,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
 ) -> Any:
     if current_user.role not in [RoleEnum.FLEET_MANAGER, RoleEnum.SAFETY_OFFICER]:
         raise HTTPException(status_code=403, detail="Not enough permissions")
@@ -49,7 +49,7 @@ async def read_driver(
     *,
     db: AsyncSession = Depends(get_db),
     id: int,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
 ) -> Any:
     result = await db.execute(select(Driver).filter(Driver.id == id))
     driver = result.scalars().first()
@@ -63,7 +63,7 @@ async def update_driver(
     db: AsyncSession = Depends(get_db),
     id: int,
     driver_in: DriverUpdate,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
 ) -> Any:
     if current_user.role not in [RoleEnum.FLEET_MANAGER, RoleEnum.SAFETY_OFFICER]:
         raise HTTPException(status_code=403, detail="Not enough permissions")

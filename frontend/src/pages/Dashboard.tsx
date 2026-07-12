@@ -2,27 +2,12 @@
 import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/authStore";
 import { Navigate } from "react-router-dom";
-import ThemeToggle from "../components/ThemeToggle";
 import GlassCard from "../components/GlassCard";
-import DataGrid from "../components/DataGrid";
-import type { ColumnDef } from "../components/DataGrid";
+
 import FleetUtilizationChart from "../components/charts/FleetUtilizationChart";
 import FuelEfficiencyChart from "../components/charts/FuelEfficiencyChart";
 import FinancialCostsChart from "../components/charts/FinancialCostsChart";
-import type {
-  Vehicle,
-  Driver,
-  Trip,
-  MaintenanceLog,
-  Expense,
-} from "../services/mockData";
-import {
-  fetchVehicles,
-  fetchDrivers,
-  fetchTrips,
-  fetchMaintenanceLogs,
-  fetchExpenses,
-} from "../services/mockData";
+import { fetchWithAuth } from "../lib/api";
 import { Truck, Users, Wrench, DollarSign, Calendar } from "lucide-react";
 
 export default function Dashboard() {
@@ -30,11 +15,11 @@ export default function Dashboard() {
   const role = useAuthStore((state) => state.role);
 
   // State for data
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [trips, setTrips] = useState<Trip[]>([]);
-  const [maintenance, setMaintenance] = useState<MaintenanceLog[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [drivers, setDrivers] = useState<any[]>([]);
+  const [trips, setTrips] = useState<any[]>([]);
+  const [maintenance, setMaintenance] = useState<any[]>([]);
+  const [expenses, setExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Load all data
@@ -42,11 +27,11 @@ export default function Dashboard() {
     async function loadData() {
       try {
         const [v, d, t, m, e] = await Promise.all([
-          fetchVehicles(),
-          fetchDrivers(),
-          fetchTrips(),
-          fetchMaintenanceLogs(),
-          fetchExpenses(),
+          fetchWithAuth("/vehicles/"),
+          fetchWithAuth("/drivers/"),
+          fetchWithAuth("/trips/"),
+          fetchWithAuth("/maintenance/"),
+          fetchWithAuth("/finance/expenses"),
         ]);
         setVehicles(v);
         setDrivers(d);
@@ -74,8 +59,8 @@ export default function Dashboard() {
   const totalCost = expenses.reduce((acc, curr) => acc + curr.cost, 0);
 
   // Status badging rendering functions
-  const renderVehicleStatus = (v: Vehicle) => {
-    const styles = {
+  const renderVehicleStatus = (v: any) => {
+    const styles: Record<string, string> = {
       Available: "bg-emerald-50 text-emerald-700 border-emerald-200/50 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
       "On Trip": "bg-blue-50 text-blue-700 border-blue-200/50 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
       "In Shop": "bg-amber-50 text-amber-700 border-amber-200/50 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
@@ -88,8 +73,8 @@ export default function Dashboard() {
     );
   };
 
-  const renderDriverStatus = (d: Driver) => {
-    const styles = {
+  const renderDriverStatus = (d: any) => {
+    const styles: Record<string, string> = {
       Available: "bg-emerald-50 text-emerald-700 border-emerald-200/50 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
       "On Trip": "bg-blue-50 text-blue-700 border-blue-200/50 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
       Suspended: "bg-rose-50 text-rose-700 border-rose-200/50 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20",
@@ -101,8 +86,8 @@ export default function Dashboard() {
     );
   };
 
-  const renderTripStatus = (t: Trip) => {
-    const styles = {
+  const renderTripStatus = (t: any) => {
+    const styles: Record<string, string> = {
       Pending: "bg-amber-50 text-amber-700 border-amber-200/50 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
       Dispatched: "bg-blue-50 text-blue-700 border-blue-200/50 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
       Completed: "bg-emerald-50 text-emerald-700 border-emerald-200/50 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
@@ -115,8 +100,8 @@ export default function Dashboard() {
     );
   };
 
-  const renderMaintenanceStatus = (m: MaintenanceLog) => {
-    const styles = {
+  const renderMaintenanceStatus = (m: any) => {
+    const styles: Record<string, string> = {
       Scheduled: "bg-blue-50 text-blue-700 border-blue-200/50 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
       "In Progress": "bg-amber-50 text-amber-700 border-amber-200/50 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
       Completed: "bg-emerald-50 text-emerald-700 border-emerald-200/50 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
@@ -128,99 +113,6 @@ export default function Dashboard() {
     );
   };
 
-  // Column definitions for DataGrids
-  const vehicleColumns: ColumnDef<Vehicle>[] = [
-    { key: "registration_number", header: "Reg No.", sortable: true },
-    { key: "model", header: "Model", sortable: true },
-    { key: "type", header: "Type", sortable: true },
-    { key: "max_capacity", header: "Max Cap (kg)", sortable: true, render: (v) => `${v.max_capacity.toLocaleString()} kg` },
-    { key: "odometer", header: "Odometer (km)", sortable: true, render: (v) => `${v.odometer.toLocaleString()} km` },
-    { key: "acquisition_cost", header: "Cost", sortable: true, render: (v) => `$${v.acquisition_cost.toLocaleString()}` },
-    { key: "status", header: "Status", sortable: true, render: renderVehicleStatus },
-  ];
-
-  const driverColumns: ColumnDef<Driver>[] = [
-    { key: "name", header: "Name", sortable: true },
-    { key: "license_number", header: "License No.", sortable: false },
-    { key: "license_category", header: "Category", sortable: true },
-    { key: "license_expiry", header: "Expiry Date", sortable: true },
-    { key: "contact", header: "Contact", sortable: false },
-    {
-      key: "safety_score",
-      header: "Safety Score",
-      sortable: true,
-      render: (d) => (
-        <span
-          className={`font-bold ${
-            d.safety_score >= 90
-              ? "text-emerald-600 dark:text-emerald-400"
-              : d.safety_score >= 75
-              ? "text-amber-600 dark:text-amber-400"
-              : "text-rose-600 dark:text-rose-400"
-          }`}
-        >
-          {d.safety_score}%
-        </span>
-      ),
-    },
-    { key: "status", header: "Status", sortable: true, render: renderDriverStatus },
-  ];
-
-  const tripColumns: ColumnDef<Trip>[] = [
-    { key: "id", header: "Trip ID", sortable: true },
-    { key: "source", header: "Source", sortable: true },
-    { key: "destination", header: "Destination", sortable: true },
-    { key: "vehicle_reg", header: "Vehicle Reg", sortable: true },
-    { key: "driver_name", header: "Driver", sortable: true },
-    { key: "cargo_weight", header: "Cargo (kg)", sortable: true, render: (t) => `${t.cargo_weight.toLocaleString()} kg` },
-    { key: "planned_distance", header: "Distance", sortable: true, render: (t) => `${t.planned_distance} km` },
-    { key: "status", header: "Status", sortable: true, render: renderTripStatus },
-  ];
-
-  const maintenanceColumns: ColumnDef<MaintenanceLog>[] = [
-    { key: "vehicle_reg", header: "Vehicle Reg", sortable: true },
-    { key: "description", header: "Description", sortable: false },
-    { key: "cost", header: "Cost", sortable: true, render: (m) => `$${m.cost.toLocaleString()}` },
-    { key: "date", header: "Date", sortable: true },
-    { key: "status", header: "Status", sortable: true, render: renderMaintenanceStatus },
-  ];
-
-  const expenseColumns: ColumnDef<Expense>[] = [
-    { key: "vehicle_reg", header: "Vehicle Reg", sortable: true },
-    {
-      key: "type",
-      header: "Expense Type",
-      sortable: true,
-      render: (e) => (
-        <span className="capitalize font-bold text-gray-800 dark:text-gray-200">
-          {e.type}
-        </span>
-      ),
-    },
-    { key: "cost", header: "Amount", sortable: true, render: (e) => `$${e.cost.toLocaleString()}` },
-    { key: "liters", header: "Fuel (Liters)", sortable: true, render: (e) => (e.liters ? `${e.liters} L` : "-") },
-    { key: "date", header: "Date", sortable: true },
-  ];
-
-  // Helper title renderer
-  const getHeaderTitle = () => {
-    switch (activeTab) {
-      case "overview":
-        return "Fleet Operations Hub";
-      case "vehicles":
-        return "Vehicle Registry";
-      case "drivers":
-        return "Driver Directory";
-      case "trips":
-        return "Trip Manifests";
-      case "maintenance":
-        return "Maintenance Logbook";
-      case "expenses":
-        return "Expense Analytics";
-      default:
-        return "TransitOps";
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
@@ -237,10 +129,6 @@ export default function Dashboard() {
               Logged in as: <span className="text-primary font-bold">{role}</span>
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-          </div>
-
         </div>
 
         {/* Loading Spinner */}
