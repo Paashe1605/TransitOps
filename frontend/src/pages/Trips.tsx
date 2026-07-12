@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchWithAuth } from "../lib/api";
+import { fetchWithAuth, API_URL } from "../lib/api";
 import { Plus, Send, CheckCircle, XCircle, FileDown } from "lucide-react";
 import CreateTripModal from "../components/modals/CreateTripModal";
 import CompleteTripModal from "../components/modals/CompleteTripModal";
@@ -56,7 +56,7 @@ export default function Trips() {
   const handleExportPDF = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:8000/api/v1/reports/export/trips", {
+      const res = await fetch(`${API_URL}/reports/export/trips`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("Failed to export PDF");

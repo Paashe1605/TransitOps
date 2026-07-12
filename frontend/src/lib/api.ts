@@ -1,4 +1,4 @@
-export const API_URL = "http://localhost:8000/api/v1";
+export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 import { useAuthStore } from "../store/authStore";
 
 export async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
