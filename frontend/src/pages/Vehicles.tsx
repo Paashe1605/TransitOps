@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { fetchWithAuth } from "../lib/api";
-import { Plus } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
 import CreateVehicleModal from "../components/modals/CreateVehicleModal";
+import VehicleDocumentsModal from "../components/modals/VehicleDocumentsModal";
 import DataGrid from "../components/DataGrid";
 import type { ColumnDef } from "../components/DataGrid";
 import GlassCard from "../components/GlassCard";
@@ -21,6 +22,8 @@ export default function Vehicles() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+  const [docModalVehicleId, setDocModalVehicleId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchVehicles();
@@ -59,6 +62,22 @@ export default function Vehicles() {
     { key: "odometer", header: "Odometer (km)", sortable: true, render: (v) => `${v.odometer.toLocaleString()} km` },
     { key: "acquisition_cost", header: "Cost", sortable: true, render: (v) => v.acquisition_cost ? `$${v.acquisition_cost.toLocaleString()}` : '-' },
     { key: "status", header: "Status", sortable: true, render: renderVehicleStatus },
+    {
+      key: "id",
+      header: "Actions",
+      sortable: false,
+      render: (v) => (
+        <button
+          onClick={() => {
+            setDocModalVehicleId(v.id);
+            setIsDocModalOpen(true);
+          }}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-md transition-colors"
+        >
+          <FileText size={14} /> Docs
+        </button>
+      ),
+    },
   ];
 
   return (
@@ -80,6 +99,12 @@ export default function Vehicles() {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onSuccess={fetchVehicles} 
+      />
+
+      <VehicleDocumentsModal
+        isOpen={isDocModalOpen}
+        onClose={() => setIsDocModalOpen(false)}
+        vehicleId={docModalVehicleId}
       />
 
       <GlassCard>

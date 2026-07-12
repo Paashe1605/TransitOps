@@ -24,7 +24,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [v, d, t, m, e] = await Promise.all([
+        const [v, d, _t, _m, e] = await Promise.all([
           fetchWithAuth("/vehicles/"),
           fetchWithAuth("/drivers/"),
           fetchWithAuth("/trips/"),
@@ -33,8 +33,6 @@ export default function Dashboard() {
         ]);
         setVehicles(v);
         setDrivers(d);
-        setTrips(t);
-        setMaintenance(m);
         setExpenses(e);
       } catch (err) {
         console.error("Failed to load dashboard data:", err);
